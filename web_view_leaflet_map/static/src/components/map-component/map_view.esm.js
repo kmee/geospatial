@@ -6,7 +6,7 @@ import {Layout} from "@web/search/layout";
 import {session} from "@web/session";
 import {PinList} from "../pin-list/pin_list.esm";
 
-/* global L, console, document, DOMParser, window */
+/* global L, document, DOMParser, window */
 
 const {Component, useSubEnv, onWillStart, onMounted, onPatched, useRef, useState} = owl;
 
@@ -44,36 +44,36 @@ export class MapRenderer extends Component {
         this.leafletTileUrl = session["leaflet.tile_url"];
         this.leafletCopyright = session["leaflet.copyright"];
 
-        // Parse arch attributes
-        const archAttrs = this.props.archInfo.arch.attributes;
+        // Parse arch attributes using getAttribute for proper access
+        const archEl = this.props.archInfo.arch;
+        const getAttr = (name, defaultVal = null) =>
+            archEl.getAttribute(name) || defaultVal;
 
         this.resModel = this.props.resModel;
-        this.defaultZoom = parseInt(archAttrs.default_zoom, 10) || 7;
-        this.maxZoom = parseInt(archAttrs.max_zoom, 10) || 19;
-        this.zoomSnap = parseInt(archAttrs.zoom_snap, 10) || 1;
+        this.defaultZoom = parseInt(getAttr("default_zoom", "7"), 10);
+        this.maxZoom = parseInt(getAttr("max_zoom", "19"), 10);
+        this.zoomSnap = parseInt(getAttr("zoom_snap", "1"), 10);
 
         // Field mappings
-        this.fieldLatitude = archAttrs.field_latitude?.value;
-        this.fieldLongitude = archAttrs.field_longitude?.value;
-        this.fieldTitle = archAttrs.field_title?.value;
-        this.fieldAddress = archAttrs.field_address?.value;
-        this.fieldMarkerIconImage = archAttrs.field_marker_icon_image?.value;
+        this.fieldLatitude = getAttr("field_latitude");
+        this.fieldLongitude = getAttr("field_longitude");
+        this.fieldTitle = getAttr("field_title");
+        this.fieldAddress = getAttr("field_address");
+        this.fieldMarkerIconImage = getAttr("field_marker_icon_image");
 
         // Marker icon configuration
-        this.markerIconSizeX = parseInt(archAttrs.marker_icon_size_x?.value, 10) || 64;
-        this.markerIconSizeY = parseInt(archAttrs.marker_icon_size_y?.value, 10) || 64;
-        this.markerPopupAnchorX =
-            parseInt(archAttrs.marker_popup_anchor_x?.value, 10) || 0;
-        this.markerPopupAnchorY =
-            parseInt(archAttrs.marker_popup_anchor_y?.value, 10) || -32;
+        this.markerIconSizeX = parseInt(getAttr("marker_icon_size_x", "64"), 10);
+        this.markerIconSizeY = parseInt(getAttr("marker_icon_size_y", "64"), 10);
+        this.markerPopupAnchorX = parseInt(getAttr("marker_popup_anchor_x", "0"), 10);
+        this.markerPopupAnchorY = parseInt(getAttr("marker_popup_anchor_y", "-32"), 10);
 
         // New view options
-        this.showPinList = archAttrs.show_pin_list?.value !== "0";
-        this.groupBy = archAttrs.group_by?.value;
-        this.panelTitle = archAttrs.panel_title?.value || "Locations";
-        this.showNumberedMarkers = archAttrs.numbered_markers?.value === "1";
-        this.enableRouting = archAttrs.routing?.value === "1";
-        this.enableNavigation = archAttrs.enable_navigation?.value !== "0";
+        this.showPinList = getAttr("show_pin_list") !== "0";
+        this.groupBy = getAttr("group_by");
+        this.panelTitle = getAttr("panel_title") || "Locations";
+        this.showNumberedMarkers = getAttr("numbered_markers") === "1";
+        this.enableRouting = getAttr("routing") === "1";
+        this.enableNavigation = getAttr("enable_navigation") !== "0";
 
         // State
         this.state = useState({
@@ -150,8 +150,7 @@ export class MapRenderer extends Component {
             this.state.records = records;
             // Also keep for backward compatibility
             this.records = records;
-        } catch (error) {
-            console.error("Error loading records:", error);
+        } catch {
             this.state.records = [];
             this.records = [];
         } finally {
@@ -169,7 +168,6 @@ export class MapRenderer extends Component {
         // Required fields
         fields.add("id");
         fields.add("display_name");
-        fields.add("date_localization");
 
         // Optional fields based on arch attributes
         if (this.fieldLatitude) fields.add(this.fieldLatitude);
@@ -178,6 +176,13 @@ export class MapRenderer extends Component {
         if (this.fieldAddress) fields.add(this.fieldAddress);
         if (this.fieldMarkerIconImage) fields.add(this.fieldMarkerIconImage);
         if (this.groupBy) fields.add(this.groupBy);
+
+        // Add fields declared in the arch
+        if (this.props.archInfo?.fieldNodes) {
+            for (const fieldName of Object.keys(this.props.archInfo.fieldNodes)) {
+                fields.add(fieldName);
+            }
+        }
 
         return Array.from(fields);
     }
@@ -201,7 +206,6 @@ export class MapRenderer extends Component {
     initMap() {
         const mapDiv = this.mapRef.el;
         if (!mapDiv) {
-            console.error("Map container not found");
             return;
         }
 
@@ -256,7 +260,6 @@ export class MapRenderer extends Component {
      */
     renderMarkers() {
         if (!this.leafletMap) {
-            console.warn("Map not initialized yet");
             return;
         }
 
@@ -348,8 +351,13 @@ export class MapRenderer extends Component {
      * @returns {L.Icon}
      */
     prepareMarkerIcon(record) {
-        const lastUpdate = record.date_localization || new Date().toISOString();
-        const unique = lastUpdate.replace(/[^0-9]/g, "");
+        // Use any date field as cache buster, or fall back to current time
+        const lastUpdate =
+            record.date_localization ||
+            record.write_date ||
+            record.id ||
+            new Date().toISOString();
+        const unique = String(lastUpdate).replace(/[^0-9]/g, "");
         const iconUrl = `/web/image?model=${this.resModel}&id=${record.id}&field=${this.fieldMarkerIconImage}&unique=${unique}`;
 
         return L.icon({
