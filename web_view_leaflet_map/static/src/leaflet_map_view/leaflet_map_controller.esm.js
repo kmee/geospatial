@@ -1,7 +1,5 @@
 /** @odoo-module **/
 
-/* global console */
-
 import {Component, onWillStart, useState, useSubEnv} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {Layout} from "@web/search/layout";
@@ -122,12 +120,6 @@ export class LeafletMapController extends Component {
      * @param {Number|null} previousRecordId - ID of the preceding record
      */
     async onResequence(recordId, targetGroupId, previousRecordId) {
-        console.log("LeafletMapController.onResequence:", {
-            recordId,
-            targetGroupId,
-            previousRecordId,
-        });
-
         try {
             const result = await this.model.resequence(
                 recordId,
@@ -135,19 +127,15 @@ export class LeafletMapController extends Component {
                 previousRecordId
             );
 
-            console.log("Resequence result:", result);
-
             if (result.success) {
                 await this.reloadData();
             } else {
-                // Show error notification if resequence failed
                 this.notification.add(result.error || "Failed to reorder item", {
                     type: "danger",
                 });
             }
             return result;
         } catch (error) {
-            console.error("Resequence error:", error);
             this.notification.add(error.message || "Failed to reorder item", {
                 type: "danger",
             });

@@ -1,7 +1,5 @@
 /** @odoo-module **/
 
-/* global console */
-
 import {KeepLast} from "@web/core/utils/concurrency";
 
 /**
@@ -159,9 +157,6 @@ export class LeafletMapModel {
      */
     async resequence(recordId, targetGroupId, previousRecordId) {
         if (!this.archInfo.defaultOrder) {
-            console.warn(
-                "LeafletMapModel: No default_order configured for resequencing"
-            );
             return {success: false, error: "Resequencing not configured"};
         }
 
@@ -216,7 +211,6 @@ export class LeafletMapModel {
             await this.orm.write(this.resModel, [recordId], updates);
             return {success: true};
         } catch (error) {
-            console.error("LeafletMapModel: Resequence failed", error);
             return {success: false, error: error.message};
         }
     }
