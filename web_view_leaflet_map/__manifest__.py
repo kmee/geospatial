@@ -19,7 +19,7 @@
     "assets": {
         "web.assets_backend": [
             # Pin List component
-            "web_view_leaflet_map/static/src/components/pin-list/pin_list.js",
+            "web_view_leaflet_map/static/src/components/pin-list/pin_list.esm.js",
             "web_view_leaflet_map/static/src/components/pin-list/pin_list.xml",
             "web_view_leaflet_map/static/src/components/pin-list/pin_list.css",
             # Map component
