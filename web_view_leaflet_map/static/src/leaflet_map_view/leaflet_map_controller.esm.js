@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+/* global console */
+
 import {Component, onWillStart, useState, useSubEnv} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {Layout} from "@web/search/layout";
@@ -40,10 +42,13 @@ export class LeafletMapController extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
 
         // State for reactive updates
+        // dataVersion is incremented after each data reload to force re-render
         this.state = useState({
             loading: true,
+            dataVersion: 0,
         });
 
         // Set up sub-environment for child components
@@ -104,6 +109,8 @@ export class LeafletMapController extends Component {
             await this.model.reload();
         } finally {
             this.state.loading = false;
+            // Increment dataVersion to force re-render of child components
+            this.state.dataVersion++;
         }
     }
 
@@ -115,15 +122,37 @@ export class LeafletMapController extends Component {
      * @param {Number|null} previousRecordId - ID of the preceding record
      */
     async onResequence(recordId, targetGroupId, previousRecordId) {
-        const result = await this.model.resequence(
+        console.log("LeafletMapController.onResequence:", {
             recordId,
             targetGroupId,
-            previousRecordId
-        );
-        if (result.success) {
-            await this.reloadData();
+            previousRecordId,
+        });
+
+        try {
+            const result = await this.model.resequence(
+                recordId,
+                targetGroupId,
+                previousRecordId
+            );
+
+            console.log("Resequence result:", result);
+
+            if (result.success) {
+                await this.reloadData();
+            } else {
+                // Show error notification if resequence failed
+                this.notification.add(result.error || "Failed to reorder item", {
+                    type: "danger",
+                });
+            }
+            return result;
+        } catch (error) {
+            console.error("Resequence error:", error);
+            this.notification.add(error.message || "Failed to reorder item", {
+                type: "danger",
+            });
+            return {success: false, error: error.message};
         }
-        return result;
     }
 
     /**
@@ -137,6 +166,8 @@ export class LeafletMapController extends Component {
             context: this.props.context,
             model: this.model,
             onResequence: this.onResequence.bind(this),
+            // DataVersion triggers re-render when data changes
+            dataVersion: this.state.dataVersion,
         };
     }
 }

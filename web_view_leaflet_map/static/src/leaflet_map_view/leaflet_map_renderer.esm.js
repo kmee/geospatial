@@ -45,6 +45,8 @@ export class LeafletMapRenderer extends Component {
         context: {type: Object, optional: true},
         model: {type: Object},
         onResequence: {type: Function, optional: true},
+        // DataVersion changes when data is reloaded, triggering re-render
+        dataVersion: {type: Number, optional: true},
     };
 
     /**
