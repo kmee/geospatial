@@ -49,36 +49,51 @@ export class PinList extends Component {
     }
 
     /**
-     * Get records organized by groups
+     * Get records organized by groups.
+     * Records without a groupBy value are placed in "Sem Viagem" (Unassigned) group.
      */
     get groupedRecords() {
         const records = this.filteredRecords;
+        const UNASSIGNED_GROUP_NAME = "Sem Viagem";
+        const UNASSIGNED_COLOR = "#fd7e14"; // Orange
 
         if (!this.props.groupBy) {
-            return [{name: null, records, color: null}];
+            return [{name: null, records, color: null, isUnassigned: false}];
         }
 
         const groups = {};
         for (const record of records) {
             const groupValue = record[this.props.groupBy];
-            // Handle Many2one fields (array with [id, name])
-            const groupKey = Array.isArray(groupValue)
-                ? groupValue[1]
-                : groupValue || "Undefined";
+            let isUnassigned = false;
+            let groupKey = UNASSIGNED_GROUP_NAME;
+
+            // Handle Many2one fields (array with [id, name]) and empty values
+            if (!groupValue || (Array.isArray(groupValue) && !groupValue[0])) {
+                // No group value - unassigned
+                isUnassigned = true;
+            } else {
+                groupKey = Array.isArray(groupValue) ? groupValue[1] : groupValue;
+            }
 
             if (!groups[groupKey]) {
                 groups[groupKey] = {
                     name: groupKey,
                     records: [],
-                    color: this.getGroupColor(groupKey),
+                    color: isUnassigned
+                        ? UNASSIGNED_COLOR
+                        : this.getGroupColor(groupKey),
+                    isUnassigned: isUnassigned,
                 };
             }
             groups[groupKey].records.push(record);
         }
 
-        return Object.values(groups).sort((a, b) =>
-            String(a.name).localeCompare(String(b.name))
-        );
+        // Sort: alphabetically, then unassigned group last
+        return Object.values(groups).sort((a, b) => {
+            if (a.isUnassigned && !b.isUnassigned) return 1;
+            if (!a.isUnassigned && b.isUnassigned) return -1;
+            return String(a.name).localeCompare(String(b.name));
+        });
     }
 
     /**
@@ -183,10 +198,17 @@ export class PinList extends Component {
     }
 
     /**
-     * Check if a group is collapsed
+     * Check if a group is collapsed.
+     * The "Sem Viagem" (unassigned) group is collapsed by default.
      */
     isGroupCollapsed(groupName) {
-        return this.state.collapsedGroups[groupName] || false;
+        const UNASSIGNED_GROUP_NAME = "Sem Viagem";
+        // If explicitly set, use that value; otherwise default to collapsed for unassigned
+        if (groupName in this.state.collapsedGroups) {
+            return this.state.collapsedGroups[groupName];
+        }
+        // Default: unassigned group is collapsed, others are expanded
+        return groupName === UNASSIGNED_GROUP_NAME;
     }
 
     /**

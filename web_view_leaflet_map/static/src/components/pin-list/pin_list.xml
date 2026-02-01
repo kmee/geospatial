@@ -70,16 +70,24 @@
                 <!-- Groups -->
                 <div class="o_pin_list_groups">
                     <t t-foreach="groupedRecords" t-as="group" t-key="group.name">
-                        <div class="o_pin_group">
+                        <div
+                            t-attf-class="o_pin_group {{ group.isUnassigned ? 'o_pin_group_unassigned' : '' }}"
+                        >
                             <!-- Group header (only if grouped) -->
                             <t t-if="group.name !== null">
                                 <div
-                                    class="o_pin_group_header"
+                                    t-attf-class="o_pin_group_header {{ group.isUnassigned ? 'o_unassigned_header' : '' }}"
                                     t-on-click="() => this.toggleGroup(group.name)"
                                 >
                                     <i
                                         t-attf-class="fa {{ isGroupCollapsed(group.name) ? 'fa-caret-right' : 'fa-caret-down' }}"
                                     />
+                                    <t t-if="group.isUnassigned">
+                                        <i
+                                            class="fa fa-inbox text-warning me-1"
+                                            title="Items not assigned to any group"
+                                        />
+                                    </t>
                                     <span
                                         class="o_pin_group_color"
                                         t-attf-style="background-color: {{ group.color }}"
@@ -88,7 +96,7 @@
                                         <t t-esc="group.name" />
                                     </span>
                                     <span
-                                        class="o_pin_group_count badge bg-secondary ms-auto"
+                                        t-attf-class="o_pin_group_count badge {{ group.isUnassigned ? 'bg-warning' : 'bg-secondary' }} ms-auto"
                                     >
                                         <t t-esc="group.records.length" />
                                     </span>

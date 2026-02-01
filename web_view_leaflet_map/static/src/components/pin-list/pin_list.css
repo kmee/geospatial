@@ -128,6 +128,19 @@
     flex-shrink: 0;
 }
 
+/* Unassigned group styling */
+.o_pin_group.o_pin_group_unassigned {
+    border-left: 3px solid #fd7e14;
+}
+
+.o_pin_group_header.o_unassigned_header {
+    background-color: #fff8f0;
+}
+
+.o_pin_group_header.o_unassigned_header:hover {
+    background-color: #ffe8d6;
+}
+
 /* Group items */
 .o_pin_group_items {
     /* No padding - items handle their own */

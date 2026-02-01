@@ -79,18 +79,24 @@ This is a generic component for any model that supports resequencing.
                 <div class="o_pin_list_groups">
                     <t t-foreach="groupedRecords" t-as="group" t-key="group.name">
                         <div
-                            class="o_pin_group"
+                            t-attf-class="o_pin_group {{ group.isUnassigned ? 'o_pin_group_unassigned' : '' }}"
                             t-att-data-group-id="group.records.length > 0 ? getRecordGroupId(group.records[0]) : ''"
                         >
                             <!-- Group header (only if grouped) -->
                             <t t-if="group.name !== null">
                                 <div
-                                    class="o_pin_group_header"
+                                    t-attf-class="o_pin_group_header {{ group.isUnassigned ? 'o_unassigned_header' : '' }}"
                                     t-on-click="() => this.toggleGroup(group.name)"
                                 >
                                     <i
                                         t-attf-class="fa {{ isGroupCollapsed(group.name) ? 'fa-caret-right' : 'fa-caret-down' }}"
                                     />
+                                    <t t-if="group.isUnassigned">
+                                        <i
+                                            class="fa fa-inbox text-warning me-1"
+                                            title="Stops not assigned to any trip"
+                                        />
+                                    </t>
                                     <span
                                         class="o_pin_group_color"
                                         t-attf-style="background-color: {{ group.color }}"
@@ -99,12 +105,14 @@ This is a generic component for any model that supports resequencing.
                                         <t t-esc="group.name" />
                                     </span>
                                     <span
-                                        class="o_pin_group_count badge bg-secondary ms-auto"
+                                        t-attf-class="o_pin_group_count badge {{ group.isUnassigned ? 'bg-warning' : 'bg-secondary' }} ms-auto"
                                     >
                                         <t t-esc="group.records.length" />
                                     </span>
-                                    <!-- Navigate All button -->
-                                    <t t-if="getGroupGoogleMapsUrl(group)">
+                                    <!-- Navigate All button (not for unassigned) -->
+                                    <t
+                                        t-if="!group.isUnassigned and getGroupGoogleMapsUrl(group)"
+                                    >
                                         <a
                                             class="o_group_navigate_all btn btn-sm btn-outline-primary ms-2"
                                             t-att-href="getGroupGoogleMapsUrl(group)"
