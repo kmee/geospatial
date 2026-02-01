@@ -1,13 +1,18 @@
 /** @odoo-module **/
 
+/* global L, document, window */
+
+import {
+    Component,
+    onMounted,
+    onPatched,
+    onWillStart,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
-import {Layout} from "@web/search/layout";
 import {session} from "@web/session";
-import {PinList} from "../pin-list/pin_list.esm";
-
-/* global L, document, DOMParser, window */
-
-const {Component, useSubEnv, onWillStart, onMounted, onPatched, useRef, useState} = owl;
+import {PinList} from "../components/pin-list/pin_list.esm";
 
 // Default colors for group markers
 const GROUP_COLORS = [
@@ -24,15 +29,26 @@ const GROUP_COLORS = [
 ];
 
 /**
- * MapRenderer component for displaying records on a Leaflet map.
+ * LeafletMapRenderer component for displaying records on a Leaflet map.
  * Supports markers, clustering, popups, routing, and a sidebar pin list.
+ *
+ * Following Odoo Enterprise web_map Renderer pattern.
  */
-export class MapRenderer extends Component {
-    static template = "web_view_leaflet_map.MapRenderer";
+export class LeafletMapRenderer extends Component {
+    static template = "web_view_leaflet_map.LeafletMapRenderer";
     static components = {PinList};
 
+    static props = {
+        resModel: {type: String},
+        archInfo: {type: Object},
+        fields: {type: Object, optional: true},
+        context: {type: Object, optional: true},
+        model: {type: Object},
+        onResequence: {type: Function, optional: true},
+    };
+
     /**
-     * Initializes the MapRenderer component, setting up services, references, and configuration.
+     * Initializes the LeafletMapRenderer component.
      */
     setup() {
         this.orm = useService("orm");
@@ -43,41 +59,41 @@ export class MapRenderer extends Component {
         this.leafletTileUrl = session["leaflet.tile_url"];
         this.leafletCopyright = session["leaflet.copyright"];
 
-        // Parse arch attributes using getAttribute for proper access
-        const archEl = this.props.archInfo.arch;
-        const getAttr = (name, defaultVal = null) =>
-            archEl.getAttribute(name) || defaultVal;
-
+        // Extract configuration from archInfo
+        const archInfo = this.props.archInfo;
         this.resModel = this.props.resModel;
-        this.defaultZoom = parseInt(getAttr("default_zoom", "7"), 10);
-        this.maxZoom = parseInt(getAttr("max_zoom", "19"), 10);
-        this.zoomSnap = parseInt(getAttr("zoom_snap", "1"), 10);
-
-        // Field mappings
-        this.fieldLatitude = getAttr("field_latitude");
-        this.fieldLongitude = getAttr("field_longitude");
-        this.fieldTitle = getAttr("field_title");
-        this.fieldAddress = getAttr("field_address");
-        this.fieldMarkerIconImage = getAttr("field_marker_icon_image");
+        this.fieldLatitude = archInfo.fieldLatitude;
+        this.fieldLongitude = archInfo.fieldLongitude;
+        this.fieldTitle = archInfo.fieldTitle;
+        this.fieldAddress = archInfo.fieldAddress;
+        this.fieldMarkerIconImage = archInfo.fieldMarkerIconImage;
 
         // Marker icon configuration
-        this.markerIconSizeX = parseInt(getAttr("marker_icon_size_x", "64"), 10);
-        this.markerIconSizeY = parseInt(getAttr("marker_icon_size_y", "64"), 10);
-        this.markerPopupAnchorX = parseInt(getAttr("marker_popup_anchor_x", "0"), 10);
-        this.markerPopupAnchorY = parseInt(getAttr("marker_popup_anchor_y", "-32"), 10);
+        this.markerIconSizeX = archInfo.markerIconSizeX || 64;
+        this.markerIconSizeY = archInfo.markerIconSizeY || 64;
+        this.markerPopupAnchorX = archInfo.markerPopupAnchorX || 0;
+        this.markerPopupAnchorY = archInfo.markerPopupAnchorY || -32;
 
-        // New view options
-        this.showPinList = getAttr("show_pin_list") !== "0";
-        this.groupBy = getAttr("group_by");
-        this.panelTitle = getAttr("panel_title") || "Locations";
-        this.showNumberedMarkers = getAttr("numbered_markers") === "1";
-        this.enableRouting = getAttr("routing") === "1";
-        this.enableNavigation = getAttr("enable_navigation") !== "0";
+        // Map configuration
+        this.defaultZoom = archInfo.defaultZoom || 7;
+        this.maxZoom = archInfo.maxZoom || 19;
+        this.zoomSnap = archInfo.zoomSnap || 1;
 
-        // State
+        // View options
+        this.showPinList = archInfo.showPinList !== false;
+        this.groupBy = archInfo.groupBy;
+        this.panelTitle = archInfo.panelTitle || "Locations";
+        this.showNumberedMarkers = archInfo.numberedMarkers === true;
+        this.enableRouting = archInfo.routing === true;
+        this.enableNavigation = archInfo.enableNavigation !== false;
+
+        // Drag-and-drop configuration
+        this.draggable = archInfo.draggable === true;
+        this.groupField = archInfo.groupField;
+        this.defaultOrder = archInfo.defaultOrder;
+
+        // Internal state (for backward compatibility with direct rendering)
         this.state = useState({
-            records: [],
-            loading: true,
             selectedRecord: null,
         });
 
@@ -87,10 +103,10 @@ export class MapRenderer extends Component {
         this.routeLayer = null;
         this.markersById = {};
         this.groupColors = {};
+        this.defaultLatLng = null;
 
         onWillStart(async () => {
             await this.initDefaultPosition();
-            await this.loadRecords();
         });
 
         onMounted(() => {
@@ -103,6 +119,20 @@ export class MapRenderer extends Component {
                 this.renderMarkers();
             }
         });
+    }
+
+    /**
+     * Get records from the model.
+     */
+    get records() {
+        return this.props.model.data.records || [];
+    }
+
+    /**
+     * Get loading state from the model.
+     */
+    get loading() {
+        return this.props.model.data.loading;
     }
 
     /**
@@ -129,64 +159,6 @@ export class MapRenderer extends Component {
     }
 
     /**
-     * Loads records from the server based on the provided domain and fields.
-     * @returns {Promise<void>}
-     */
-    async loadRecords() {
-        const fields = this.getFields();
-
-        try {
-            this.state.loading = true;
-            const records = await this.orm.searchRead(
-                this.resModel,
-                this.props.domain || [],
-                fields,
-                {
-                    limit: this.props.limit || 500,
-                    context: this.props.context || {},
-                }
-            );
-            this.state.records = records;
-            // Also keep for backward compatibility
-            this.records = records;
-        } catch {
-            this.state.records = [];
-            this.records = [];
-        } finally {
-            this.state.loading = false;
-        }
-    }
-
-    /**
-     * Gathers the required fields for the map view.
-     * @returns {string[]}
-     */
-    getFields() {
-        const fields = new Set();
-
-        // Required fields
-        fields.add("id");
-        fields.add("display_name");
-
-        // Optional fields based on arch attributes
-        if (this.fieldLatitude) fields.add(this.fieldLatitude);
-        if (this.fieldLongitude) fields.add(this.fieldLongitude);
-        if (this.fieldTitle) fields.add(this.fieldTitle);
-        if (this.fieldAddress) fields.add(this.fieldAddress);
-        if (this.fieldMarkerIconImage) fields.add(this.fieldMarkerIconImage);
-        if (this.groupBy) fields.add(this.groupBy);
-
-        // Add fields declared in the arch
-        if (this.props.archInfo?.fieldNodes) {
-            for (const fieldName of Object.keys(this.props.archInfo.fieldNodes)) {
-                fields.add(fieldName);
-            }
-        }
-
-        return Array.from(fields);
-    }
-
-    /**
      * Initializes the default position of the map by calling the server method.
      * @returns {Promise<void>}
      */
@@ -194,7 +166,7 @@ export class MapRenderer extends Component {
         const result = await this.orm.call(
             "res.users",
             "get_default_leaflet_position",
-            [this.props.resModel]
+            [this.resModel]
         );
         this.defaultLatLng = L.latLng(result.lat, result.lng);
     }
@@ -270,7 +242,7 @@ export class MapRenderer extends Component {
         this.markersById = {};
 
         let markerIndex = 0;
-        for (const record of this.state.records) {
+        for (const record of this.records) {
             const marker = this.prepareMarker(record, markerIndex);
             if (marker) {
                 this.mainLayer.addLayer(marker);
@@ -287,7 +259,7 @@ export class MapRenderer extends Component {
         this.leafletMap.addLayer(this.mainLayer);
 
         // Draw route lines if routing is enabled
-        if (this.enableRouting && this.state.records.length > 1) {
+        if (this.enableRouting && this.records.length > 1) {
             this.renderRouteLines();
         }
     }
@@ -304,7 +276,7 @@ export class MapRenderer extends Component {
 
         // Group records by groupBy field if configured
         const groups = {};
-        for (const record of this.state.records) {
+        for (const record of this.records) {
             const lat = record[this.fieldLatitude];
             const lng = record[this.fieldLongitude];
 
@@ -579,113 +551,20 @@ export class MapRenderer extends Component {
     }
 
     /**
-     * Renders a route polyline on the map.
-     * @param {Array} coordinates - Array of [lat, lng] coordinates
-     * @param {Object} options - Polyline options
-     * @returns {L.Polyline}
+     * Callback for resequence events from DraggablePinList.
+     * Delegates to the controller's onResequence handler.
      */
-    renderRoute(coordinates, options = {}) {
-        if (!this.routeLayer || !this.leafletMap) {
-            return null;
+    async onResequence(recordId, targetGroupId, previousRecordId) {
+        if (this.props.onResequence) {
+            return this.props.onResequence(recordId, targetGroupId, previousRecordId);
         }
-
-        const defaultOptions = {
-            color: "#007bff",
-            weight: 5,
-            opacity: 0.7,
-            smoothFactor: 1,
-        };
-
-        const polyline = L.polyline(coordinates, {...defaultOptions, ...options});
-
-        polyline.on("click", () => {
-            this.highlightRoute(polyline);
-        });
-
-        this.routeLayer.addLayer(polyline);
-        return polyline;
     }
 
     /**
-     * Highlights a route polyline.
-     * @param {L.Polyline} polyline
+     * Get the PinList component class to use.
+     * Override in subclasses to use DraggablePinList.
      */
-    highlightRoute(polyline) {
-        // Reset all routes to default style
-        if (this.routeLayer) {
-            this.routeLayer.eachLayer((layer) => {
-                if (layer instanceof L.Polyline) {
-                    layer.setStyle({weight: 5, opacity: 0.7});
-                }
-            });
-        }
-
-        // Highlight selected route
-        polyline.setStyle({weight: 8, opacity: 1});
-        polyline.bringToFront();
-    }
-
-    /**
-     * Clears all route polylines from the map.
-     */
-    clearRoutes() {
-        if (this.routeLayer) {
-            this.routeLayer.clearLayers();
-        }
+    get PinListComponent() {
+        return PinList;
     }
 }
-
-/**
- * Controller class for the Map view, setting up the environment configuration.
- */
-export class MapController extends Component {
-    static template = "web_view_leaflet_map.MapView";
-    static components = {Layout, MapRenderer};
-
-    setup() {
-        useSubEnv({
-            config: {
-                ...this.env.config,
-            },
-        });
-    }
-}
-
-/**
- * Helper function that normalize the architecture input to ensure it is an HTMLElement.
- * @param {string|HTMLElement} arch
- * @returns {HTMLElement}
- */
-function normalizeArch(arch) {
-    if (arch && typeof arch !== "string") return arch;
-    const xml = String(arch || "");
-    const doc = new DOMParser().parseFromString(xml, "text/xml");
-    return doc.documentElement;
-}
-
-/**
- * Definition of the map view for Odoo, including its properties and components.
- */
-export const mapView = {
-    type: "leaflet_map",
-    display_name: "Map",
-    icon: "fa fa-map-o",
-    multiRecord: true,
-    Controller: MapController,
-    Renderer: MapRenderer,
-    searchMenuTypes: ["filter", "favorite"],
-
-    props: (genericProps) => {
-        const archEl = normalizeArch(genericProps.arch);
-        return {
-            ...genericProps,
-            Renderer: MapRenderer,
-            archInfo: {
-                arch: archEl,
-            },
-        };
-    },
-};
-
-// Registry moved to leaflet_map_view/leaflet_map_view.js for MVC architecture
-// registry.category("views").add("leaflet_map", mapView);

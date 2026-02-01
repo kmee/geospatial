@@ -6,7 +6,7 @@
 {
     "name": "Leaflet Map View (OpenStreetMap)",
     "summary": "Leaflet map view with sidebar, routing, and numbered markers.",
-    "version": "18.0.1.2.0",
+    "version": "18.0.2.0.0",
     "author": "GRAP, KMEE, Odoo Community Association (OCA)",
     "maintainers": ["legalsylvain", "miloefb"],
     "website": "https://github.com/OCA/geospatial",
@@ -18,13 +18,22 @@
     ],
     "assets": {
         "web.assets_backend": [
-            # Pin List component
+            # Pin List component (base)
             "web_view_leaflet_map/static/src/components/pin-list/pin_list.esm.js",
             "web_view_leaflet_map/static/src/components/pin-list/pin_list.xml",
             "web_view_leaflet_map/static/src/components/pin-list/pin_list.css",
-            # Map component
-            "web_view_leaflet_map/static/src/components/map-component/map_view.esm.js",
-            "web_view_leaflet_map/static/src/components/map-component/map_view.xml",
+            # Draggable Pin List component (generic drag-drop)
+            "web_view_leaflet_map/static/src/components/pin-list/draggable_pin_list.esm.js",
+            "web_view_leaflet_map/static/src/components/pin-list/draggable_pin_list.xml",
+            "web_view_leaflet_map/static/src/components/pin-list/draggable_pin_list.css",
+            # Leaflet Map View - MVC architecture
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_arch_parser.esm.js",
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_model.esm.js",
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_controller.esm.js",
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_renderer.esm.js",
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_view.esm.js",
+            "web_view_leaflet_map/static/src/leaflet_map_view/leaflet_map_view.xml",
+            # Shared styles
             "web_view_leaflet_map/static/src/components/map-component/web_view_leaflet_map.css",
         ],
     },
