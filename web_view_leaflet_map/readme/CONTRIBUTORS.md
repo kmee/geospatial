@@ -1,1 +1,2 @@
 - Sylvain LE GAL (<https://www.twitter.com/legalsylvain>)
+- Mileo Ferreira Campos (KMEE) - Sidebar, routing, numbered markers

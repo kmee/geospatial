@@ -1,13 +1,14 @@
 # Copyright (C) 2022 - Today: GRAP (http://www.grap.coop)
 # @author: Sylvain LE GAL (https://twitter.com/legalsylvain)
+# Copyright (C) 2025 KMEE (https://kmee.com.br)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
     "name": "Leaflet Map View (OpenStreetMap)",
-    "summary": "Add new 'leaflet_map' view, to display markers.",
-    "version": "18.0.1.1.1",
-    "author": "GRAP, Odoo Community Association (OCA)",
-    "maintainers": ["legalsylvain"],
+    "summary": "Leaflet map view with sidebar, routing, and numbered markers.",
+    "version": "18.0.1.2.0",
+    "author": "GRAP, KMEE, Odoo Community Association (OCA)",
+    "maintainers": ["legalsylvain", "miloefb"],
     "website": "https://github.com/OCA/geospatial",
     "license": "AGPL-3",
     "category": "Extra Tools",
@@ -17,6 +18,11 @@
     ],
     "assets": {
         "web.assets_backend": [
+            # Pin List component
+            "web_view_leaflet_map/static/src/components/pin-list/pin_list.js",
+            "web_view_leaflet_map/static/src/components/pin-list/pin_list.xml",
+            "web_view_leaflet_map/static/src/components/pin-list/pin_list.css",
+            # Map component
             "web_view_leaflet_map/static/src/components/map-component/map_view.esm.js",
             "web_view_leaflet_map/static/src/components/map-component/map_view.xml",
             "web_view_leaflet_map/static/src/components/map-component/web_view_leaflet_map.css",

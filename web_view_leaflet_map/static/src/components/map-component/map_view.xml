@@ -12,7 +12,33 @@
 
     <t t-name="web_view_leaflet_map.MapRenderer" owl="1">
         <div class="o_leaflet_main_container h-100">
-            <div t-ref="mapContainer" class="o_leaflet_map_container h-100" />
+            <!-- Sidebar Pin List -->
+            <t t-if="showPinList">
+                <PinList
+                    records="state.records"
+                    groupBy="groupBy"
+                    groupColors="groupColors"
+                    panelTitle="panelTitle"
+                    onPinClick.bind="onPinClick"
+                    onNavigateClick.bind="onNavigateClick"
+                    fieldTitle="fieldTitle"
+                    fieldAddress="fieldAddress"
+                    fieldLatitude="fieldLatitude"
+                    fieldLongitude="fieldLongitude"
+                />
+            </t>
+            <!-- Map Container -->
+            <div class="o_leaflet_map_wrapper h-100">
+                <div t-ref="mapContainer" class="o_leaflet_map_container h-100" />
+                <!-- Loading Overlay -->
+                <t t-if="state.loading">
+                    <div class="o_leaflet_loading_overlay">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </t>
+            </div>
         </div>
     </t>
 
