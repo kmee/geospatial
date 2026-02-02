@@ -64,6 +64,11 @@ Authors
 
 * KMEE
 
+Contributors
+------------
+
+- Luis Felipe Mileo mileo@kmee.com.br
+
 Maintainers
 -----------
 

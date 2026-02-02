@@ -1,4 +1,9 @@
 /** @odoo-module **/
+/*
+ * Copyright (C) 2025 KMEE (https://kmee.com.br)
+ * @author Luis Felipe Mileo <mileo@kmee.com.br>
+ * License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+ */
 
 import {Component, onWillStart, useState, useSubEnv} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
