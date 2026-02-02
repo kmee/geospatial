@@ -22,11 +22,8 @@ import {PinList} from "./pin_list.esm";
  */
 export class DraggablePinList extends PinList {
     static template = "web_view_leaflet_map.DraggablePinList";
-    static props = {
-        ...PinList.props,
-        onResequence: {type: Function, optional: true},
-        groupField: {type: String, optional: true},
-    };
+    // Inherits props from PinList which includes "*": true for extensibility
+    // Additional props used: onResequence (Function), groupField (String)
 
     setup() {
         super.setup();

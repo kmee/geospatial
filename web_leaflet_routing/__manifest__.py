@@ -24,6 +24,7 @@
         "web.assets_backend": [
             "web_leaflet_routing/static/src/routing_service.esm.js",
             "web_leaflet_routing/static/src/geocoding_service.esm.js",
+            "web_leaflet_routing/static/src/components/routing_renderer.esm.js",
         ],
     },
     "installable": True,

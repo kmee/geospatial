@@ -10,7 +10,7 @@ export class PinList extends Component {
     static template = "web_view_leaflet_map.PinList";
     static props = {
         records: {type: Array},
-        groupBy: {type: String, optional: true},
+        groupBy: {type: [String, {value: null}, {value: undefined}], optional: true},
         groupColors: {type: Object, optional: true},
         panelTitle: {type: String, optional: true},
         onPinClick: {type: Function},
@@ -19,10 +19,15 @@ export class PinList extends Component {
         fieldAddress: {type: String, optional: true},
         fieldLatitude: {type: String},
         fieldLongitude: {type: String},
+        unassignedGroupName: {type: String, optional: true},
+        // Accept additional props from extending modules (groupField, onResequence, etc.)
+        // without strict type validation - enables extensibility
+        "*": true,
     };
     static defaultProps = {
         panelTitle: "Locations",
         groupColors: {},
+        unassignedGroupName: "Unassigned",
     };
 
     setup() {
@@ -50,11 +55,11 @@ export class PinList extends Component {
 
     /**
      * Get records organized by groups.
-     * Records without a groupBy value are placed in "Sem Viagem" (Unassigned) group.
+     * Records without a groupBy value are placed in the unassigned group.
      */
     get groupedRecords() {
         const records = this.filteredRecords;
-        const UNASSIGNED_GROUP_NAME = "Sem Viagem";
+        const UNASSIGNED_GROUP_NAME = this.props.unassignedGroupName;
         const UNASSIGNED_COLOR = "#fd7e14"; // Orange
 
         if (!this.props.groupBy) {
@@ -199,16 +204,15 @@ export class PinList extends Component {
 
     /**
      * Check if a group is collapsed.
-     * The "Sem Viagem" (unassigned) group is collapsed by default.
+     * The unassigned group is collapsed by default.
      */
     isGroupCollapsed(groupName) {
-        const UNASSIGNED_GROUP_NAME = "Sem Viagem";
         // If explicitly set, use that value; otherwise default to collapsed for unassigned
         if (groupName in this.state.collapsedGroups) {
             return this.state.collapsedGroups[groupName];
         }
         // Default: unassigned group is collapsed, others are expanded
-        return groupName === UNASSIGNED_GROUP_NAME;
+        return groupName === this.props.unassignedGroupName;
     }
 
     /**

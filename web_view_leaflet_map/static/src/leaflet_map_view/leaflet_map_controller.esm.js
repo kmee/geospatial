@@ -29,6 +29,9 @@ export class LeafletMapController extends Component {
         // Model and Renderer classes to use (allows overriding)
         Model: {type: Function, optional: true},
         Renderer: {type: Function, optional: true},
+        // Standard view controller props passed by Odoo framework (WithSearch)
+        // Using wildcard to accept all standard props without explicit declaration
+        "*": true,
     };
 
     static defaultProps = {

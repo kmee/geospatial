@@ -47,6 +47,8 @@ export class LeafletMapRenderer extends Component {
         onResequence: {type: Function, optional: true},
         // DataVersion changes when data is reloaded, triggering re-render
         dataVersion: {type: Number, optional: true},
+        // Accept additional props from extending modules for extensibility
+        "*": true,
     };
 
     /**
@@ -93,6 +95,9 @@ export class LeafletMapRenderer extends Component {
         this.draggable = archInfo.draggable === true;
         this.groupField = archInfo.groupField;
         this.defaultOrder = archInfo.defaultOrder;
+
+        // Configurable unassigned group name
+        this.unassignedGroupName = archInfo.unassignedGroupName || "Unassigned";
 
         // Internal state (for backward compatibility with direct rendering)
         this.state = useState({

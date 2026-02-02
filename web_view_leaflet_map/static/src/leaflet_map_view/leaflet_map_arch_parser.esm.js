@@ -118,6 +118,9 @@ export class LeafletMapArchParser {
 
         // Custom js_class for extended views
         archInfo.jsClass = getAttr("js_class");
+
+        // Configurable unassigned group name (default: "Unassigned")
+        archInfo.unassignedGroupName = getAttr("unassigned_group_name");
     }
 
     /**

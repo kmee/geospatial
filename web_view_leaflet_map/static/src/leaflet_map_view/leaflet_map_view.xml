@@ -43,6 +43,7 @@ Leaflet Map View templates following Odoo Enterprise pattern.
                     fieldLatitude="fieldLatitude"
                     fieldLongitude="fieldLongitude"
                     groupField="groupField"
+                    unassignedGroupName="unassignedGroupName"
                 />
             </t>
             <!-- Map Container -->

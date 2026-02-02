@@ -17,7 +17,6 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                 field_marker_icon_image="avatar_128"
                 show_pin_list="1"
                 enable_navigation="1"
-                group_by="category_id"
                 panel_title="Contacts"
             >
                 <field name="display_name" />
@@ -25,7 +24,6 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                 <field name="partner_longitude" />
                 <field name="display_address" />
                 <field name="avatar_128" />
-                <field name="category_id" />
                 <field name="phone" />
                 <field name="email" />
             </leaflet_map>
