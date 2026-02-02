@@ -5,18 +5,18 @@
  */
 
 import {Component, useState} from "@odoo/owl";
-import {FormViewDialog} from "@web/views/view_dialogs/form_view_dialog";
-import {Layout} from "@web/search/layout";
-import {SearchBar} from "@web/search/search_bar/search_bar";
+import {useOwnedDialogs, useService} from "@web/core/utils/hooks";
 import {WarningDialog} from "@web/core/errors/error_dialogs";
 import {_t} from "@web/core/l10n/translation";
+import {useModelWithSampleData} from "@web/model/model";
 import {extractFieldsFromArchInfo} from "@web/model/relational_model/utils";
+import {Layout} from "@web/search/layout";
+import {usePager} from "@web/search/pager_hook";
+import {SearchBar} from "@web/search/search_bar/search_bar";
+import {useSearchBarToggler} from "@web/search/search_bar/search_bar_toggler";
 import {session} from "@web/session";
 import {standardViewProps} from "@web/views/standard_view_props";
-import {useModelWithSampleData} from "@web/model/model";
-import {useOwnedDialogs, useService} from "@web/core/utils/hooks";
-import {usePager} from "@web/search/pager_hook";
-import {useSearchBarToggler} from "@web/search/search_bar/search_bar_toggler";
+import {FormViewDialog} from "@web/views/view_dialogs/form_view_dialog";
 
 export class GeoengineController extends Component {
     /**
@@ -44,8 +44,8 @@ export class GeoengineController extends Component {
                 offset: offset,
                 limit: limit,
                 total: count,
-                onUpdate: async ({offset, limit}) => {
-                    await list.load({limit, offset});
+                onUpdate: async ({offset: newOffset, limit: newLimit}) => {
+                    await list.load({limit: newLimit, offset: newOffset});
                     this.render(true);
                 },
             };

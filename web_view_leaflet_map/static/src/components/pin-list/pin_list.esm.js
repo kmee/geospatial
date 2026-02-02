@@ -65,7 +65,8 @@ export class PinList extends Component {
     get groupedRecords() {
         const records = this.filteredRecords;
         const UNASSIGNED_GROUP_NAME = this.props.unassignedGroupName;
-        const UNASSIGNED_COLOR = "#fd7e14"; // Orange
+        // Orange color for unassigned group
+        const UNASSIGNED_COLOR = "#fd7e14";
 
         if (!this.props.groupBy) {
             return [{name: null, records, color: null, isUnassigned: false}];

@@ -10,8 +10,6 @@ import {visitXML} from "@web/core/utils/xml";
 /**
  * LeafletMapArchParser parses the XML architecture of leaflet_map views.
  * Extracts field definitions and view options from the arch XML.
- *
- * Following Odoo Enterprise web_map pattern for clean separation of concerns.
  */
 export class LeafletMapArchParser {
     /**

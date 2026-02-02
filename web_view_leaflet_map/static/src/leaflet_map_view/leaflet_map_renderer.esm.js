@@ -17,6 +17,7 @@ import {
 } from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {session} from "@web/session";
+
 import {PinList} from "../components/pin-list/pin_list.esm";
 
 // Default colors for group markers
@@ -36,8 +37,6 @@ const GROUP_COLORS = [
 /**
  * LeafletMapRenderer component for displaying records on a Leaflet map.
  * Supports markers, clustering, popups, routing, and a sidebar pin list.
- *
- * Following Odoo Enterprise web_map Renderer pattern.
  */
 export class LeafletMapRenderer extends Component {
     static template = "web_view_leaflet_map.LeafletMapRenderer";
@@ -155,15 +154,15 @@ export class LeafletMapRenderer extends Component {
      */
     validateCoordinates(lat, lng) {
         try {
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
+            const parsedLat = parseFloat(lat);
+            const parsedLng = parseFloat(lng);
             return (
-                !isNaN(lat) &&
-                !isNaN(lng) &&
-                lat >= -90 &&
-                lat <= 90 &&
-                lng >= -180 &&
-                lng <= 180
+                !isNaN(parsedLat) &&
+                !isNaN(parsedLng) &&
+                parsedLat >= -90 &&
+                parsedLat <= 90 &&
+                parsedLng >= -180 &&
+                parsedLng <= 180
             );
         } catch {
             return false;

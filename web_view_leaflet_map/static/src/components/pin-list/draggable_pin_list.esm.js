@@ -10,6 +10,7 @@
 import {useRef} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {useSortable} from "@web/core/utils/sortable_owl";
+
 import {PinList} from "./pin_list.esm";
 
 /**

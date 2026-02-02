@@ -4,7 +4,6 @@ import {KeepLast} from "@web/core/utils/concurrency";
 
 /**
  * LeafletMapModel handles data loading and manipulation for the leaflet map view.
- * Following Odoo Enterprise web_map Model pattern.
  */
 export class LeafletMapModel {
     /**
@@ -252,15 +251,15 @@ export class LeafletMapModel {
      */
     _validateCoordinates(lat, lng) {
         try {
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
+            const parsedLat = parseFloat(lat);
+            const parsedLng = parseFloat(lng);
             return (
-                !isNaN(lat) &&
-                !isNaN(lng) &&
-                lat >= -90 &&
-                lat <= 90 &&
-                lng >= -180 &&
-                lng <= 180
+                !isNaN(parsedLat) &&
+                !isNaN(parsedLng) &&
+                parsedLat >= -90 &&
+                parsedLat <= 90 &&
+                parsedLng >= -180 &&
+                parsedLng <= 180
             );
         } catch {
             return false;

@@ -8,6 +8,7 @@
 import {Component, onWillStart, useState, useSubEnv} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {Layout} from "@web/search/layout";
+
 import {LeafletMapModel} from "./leaflet_map_model.esm";
 import {LeafletMapRenderer} from "./leaflet_map_renderer.esm";
 
@@ -15,8 +16,6 @@ import {LeafletMapRenderer} from "./leaflet_map_renderer.esm";
  * LeafletMapController is the main controller for the leaflet map view.
  * It manages the model lifecycle and coordinates between the search panel
  * and the renderer.
- *
- * Following Odoo Enterprise web_map Controller pattern.
  */
 export class LeafletMapController extends Component {
     static template = "web_view_leaflet_map.LeafletMapController";

@@ -3,6 +3,7 @@
 import {useService} from "@web/core/utils/hooks";
 import {Layout} from "@web/search/layout";
 import {session} from "@web/session";
+
 import {PinList} from "../pin-list/pin_list.esm";
 
 /* global L, document, DOMParser, window */
@@ -113,15 +114,15 @@ export class MapRenderer extends Component {
      */
     validateCoordinates(lat, lng) {
         try {
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
+            const parsedLat = parseFloat(lat);
+            const parsedLng = parseFloat(lng);
             return (
-                !isNaN(lat) &&
-                !isNaN(lng) &&
-                lat >= -90 &&
-                lat <= 90 &&
-                lng >= -180 &&
-                lng <= 180
+                !isNaN(parsedLat) &&
+                !isNaN(parsedLng) &&
+                parsedLat >= -90 &&
+                parsedLat <= 90 &&
+                parsedLng >= -180 &&
+                parsedLng <= 180
             );
         } catch {
             return false;

@@ -3,9 +3,6 @@
 /**
  * Copyright 2023 ACSONE SA/NV
  */
-import {SearchBarRecords} from "./search_bar_records/search_bar_records.esm";
-import {useService} from "@web/core/utils/hooks";
-
 import {
     Component,
     onWillRender,
@@ -13,6 +10,9 @@ import {
     onWillUpdateProps,
     useState,
 } from "@odoo/owl";
+import {useService} from "@web/core/utils/hooks";
+
+import {SearchBarRecords} from "./search_bar_records/search_bar_records.esm";
 
 export class RecordsPanel extends Component {
     setup() {

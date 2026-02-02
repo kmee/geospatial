@@ -27,11 +27,12 @@ export class RoutingService {
             return null;
         }
 
+        let routeWaypoints = waypoints;
         if (waypoints.length > this.maxWaypoints) {
             console.warn(
                 `Too many waypoints (${waypoints.length}), truncating to ${this.maxWaypoints}`
             );
-            waypoints = waypoints.slice(0, this.maxWaypoints);
+            routeWaypoints = waypoints.slice(0, this.maxWaypoints);
         }
 
         // Try MapBox first if configured
@@ -39,7 +40,7 @@ export class RoutingService {
             this.provider === "mapbox" ||
             (this.provider === "auto" && this.mapboxToken)
         ) {
-            const result = await this._getRouteMapBox(waypoints, profile);
+            const result = await this._getRouteMapBox(routeWaypoints, profile);
             if (result) {
                 return result;
             }
@@ -50,7 +51,7 @@ export class RoutingService {
         }
 
         // Fallback to OSRM
-        return this._getRouteOSRM(waypoints, profile);
+        return this._getRouteOSRM(routeWaypoints, profile);
     }
 
     /**

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import {registry} from "@web/core/registry";
+
 import {LeafletMapArchParser} from "./leaflet_map_arch_parser.esm";
 import {LeafletMapController} from "./leaflet_map_controller.esm";
 import {LeafletMapModel} from "./leaflet_map_model.esm";
@@ -8,8 +9,6 @@ import {LeafletMapRenderer} from "./leaflet_map_renderer.esm";
 
 /**
  * Definition of the leaflet_map view for Odoo.
- *
- * Following Odoo Enterprise web_map pattern:
  * - Separate ArchParser, Model, Controller, Renderer classes
  * - Extensible via spread syntax for custom views
  * - Uses js_class attribute to select custom view implementations

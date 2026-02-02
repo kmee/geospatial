@@ -3,8 +3,6 @@
 Copyright (C) 2022 - Today: GRAP (http://www.grap.coop)
 Copyright (C) 2025 KMEE (https://kmee.com.br)
 License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
-Leaflet Map View templates following Odoo Enterprise pattern.
 -->
 <templates xml:space="preserve">
 
